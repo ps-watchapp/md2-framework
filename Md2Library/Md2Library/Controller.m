@@ -13,6 +13,7 @@
 #import "Controller.h"
 #import "ComboboxWidget.h"
 #import "EntitySelectorWidget.h"
+#import "ListViewWidget.h"
 
 @interface Controller ()
 @end
@@ -70,7 +71,7 @@
     for (Widget *widget in widgets)
     {
         //EntitySelectorWidgets and ComboboxWidgets are handled seperately
-        if ([widget class] != [EntitySelectorWidget class])
+        if ([widget class] != [EntitySelectorWidget class] && [widget class] != [ListViewWidget class])
         {
             NSString *data = [dataMapper getDataByIdentifier: widget.identifier];
             if (data != nil)
@@ -123,6 +124,12 @@
             [entitySelectorWidget setOptions: stringData];
             [entitySelectorWidget setData: [currentObject valueForKey: entitySelectorWidget.textProposition]];
         }
+    }
+    
+    NSSet *listViewWidgets = [contentView getAllListViewWidgets];
+    for (ListViewWidget *listViewWidget in listViewWidgets) {
+        [listViewWidget setContentProvider: [dataMapper getContentProviderByIdentifier:listViewWidget.identifier]];
+        [listViewWidget setSelection:[dataMapper getSelectionByIdentifier:listViewWidget.identifier]];
     }
 }
 

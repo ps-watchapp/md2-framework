@@ -67,6 +67,24 @@
     return nil;
 }
 
+-(id) getContentProviderByIdentifier: (NSString *) identifier
+{
+    NSString *dataKeyId = @"";
+    NSString *dataKey = [identifierDataKeyMapping objectForKey: identifier];
+    if ([identifierDataKeyMapping objectForKey: identifier] != nil)
+        dataKeyId = [identifier stringByAppendingFormat: @"_%@", [identifierDataKeyMapping objectForKey: identifier]];
+    return [dataKeyContentProviderMapping objectForKey: dataKeyId];
+}
+
+-(id) getSelectionByIdentifier: (NSString *) identifier
+{
+    NSString *dataKeyId = @"";
+    NSString *dataKey = [identifierDataKeyMapping objectForKey: [identifier stringByAppendingString: @"Selection"]];
+    if ([identifierDataKeyMapping objectForKey: identifier] != nil)
+        dataKeyId = [identifier stringByAppendingFormat: @"Selection_%@", dataKey];
+    return [dataKeyContentProviderMapping objectForKey: dataKeyId];
+}
+
 -(void) setDataByIdentifier: (id) data identifier: (NSString *) identifier
 {
     NSString *dataKeyId = @"";

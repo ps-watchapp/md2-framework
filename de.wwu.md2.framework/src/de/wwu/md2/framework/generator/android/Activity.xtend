@@ -22,6 +22,14 @@ import de.wwu.md2.framework.mD2.ViewElementType
 
 import static de.wwu.md2.framework.generator.util.MD2GeneratorUtil.*
 import static de.wwu.md2.framework.mD2.TextInputType.*
+import de.wwu.md2.framework.mD2.List
+import de.wwu.md2.framework.mD2.Listtype
+import de.wwu.md2.framework.mD2.PathDefinition
+import de.wwu.md2.framework.mD2.MappingTask
+import de.wwu.md2.framework.mD2.ViewGUIElement
+import de.wwu.md2.framework.mD2.Entity
+import de.wwu.md2.framework.generator.IExtendedFileSystemAccess
+import de.wwu.md2.framework.mD2.ContentProviderPathDefinition
 
 class Activity {
 	
@@ -35,7 +43,7 @@ class Activity {
 	// General activity
 	/////////////////////////////////////////
 	
-	def generateActivity(String basePackage, ContainerElement elem) '''
+	def generateActivity(String basePackage, ContainerElement elem, DataContainer dataContainer) '''
 		«var elemName = getName(elem)»
 		«if (elemName == null) elemName = elem.name»
 		package «basePackage».controller;
@@ -229,6 +237,7 @@ class Activity {
 		import android.widget.Button;
 		import android.widget.Spinner;
 		import android.widget.TextView;
+		import android.widget.AdapterView;
 		import de.wwu.md2.android.lib.MD2Application;
 		import de.wwu.md2.android.lib.controller.contentprovider.EntitySelectorHandler;
 		import de.wwu.md2.android.lib.controller.events.MD2EventHandler;
@@ -241,6 +250,26 @@ class Activity {
 		import de.wwu.md2.android.lib.view.MessageBoxFragment;
 		import de.wwu.md2.android.lib.view.TimePickerFragment;
 		import «classDef.basePackage».R;
+		
+		«FOR contentElement : getElements(elem)»
+			«IF getViewGUIElement(contentElement) instanceof List»
+			import «classDef.basePackage».models.«((getViewGUIElement(contentElement)as List).itemtype as ReferencedModelType).entity.name.toFirstUpper»;
+			import «classDef.basePackage».contentprovider.«(getRefContentProvider(getViewGUIElement(contentElement) as List, dataContainer) as MappingTask).pathDefinition.contentProviderRef.name.toFirstUpper»;
+			import «classDef.basePackage».adapter.CheckboxAdapter;
+			import android.widget.ListAdapter;
+			import android.widget.ListView;
+			import java.util.ArrayList;
+			import android.content.Intent;
+			import android.view.View.OnClickListener;
+			import android.widget.AdapterView.OnItemClickListener;
+			import de.wwu.md2.android.lib.view.TabbedActivity;
+			«IF (getViewGUIElement(contentElement) as List).listtype.value == Listtype::CHECKBOX_VALUE»
+			import «classDef.basePackage».models.«((getMapping(getViewGUIElement(contentElement), dataContainer) as ContentProviderPathDefinition).tail.attributeRef.eContainer as Entity).name»;
+			import «classDef.basePackage».contentprovider.«(getMapping(getViewGUIElement(contentElement) as List, dataContainer) as ContentProviderPathDefinition).contentProviderRef.name.toFirstUpper»;
+			
+				«ENDIF»
+			«ENDIF»
+		«ENDFOR»
 		
 		@SuppressWarnings("unused")
 		public class «classDef.simpleName» extends Fragment {
@@ -261,6 +290,12 @@ class Activity {
 					view = inflater.inflate(R.layout.«getName(elem).toLowerCase», container, false);
 				}
 				
+			«FOR viewElemType : getElements(elem)»
+				«IF getViewGUIElement(viewElemType) instanceof List»
+					«generateList(getViewGUIElement(viewElemType) as List, elem)»
+				«ENDIF» 
+			«ENDFOR»
+								
 				return view;
 			}
 			
@@ -383,6 +418,44 @@ class Activity {
 					}
 				});
 		«ENDIF»
+	'''
+	
+	def private CharSequence generateList(List elem, ContainerElement containerElement)'''
+		«(getRefContentProvider(elem, dataContainer) as MappingTask).pathDefinition.contentProviderRef.name.toFirstUpper» contentProvider =  («(getRefContentProvider(elem, dataContainer) as MappingTask).pathDefinition.contentProviderRef.name.toFirstUpper»)getApp().findContentProviderByType(«(getRefContentProvider(elem, dataContainer) as MappingTask).pathDefinition.contentProviderRef.name.toFirstUpper».class);
+		ArrayList<«(elem.itemtype as ReferencedModelType).entity.name.toFirstUpper»> «elem.name» = contentProvider.getContentList();
+				
+				
+		//Create ListAdapter to present Items in Array
+		«IF elem.listtype == Listtype::PLAIN»
+		ListAdapter adapter = new ArrayAdapter<«(elem.itemtype as ReferencedModelType).entity.name.toFirstUpper»>(getApp().getApplicationContext(), android.R.layout.simple_list_item_1,  «elem.name»);
+		«ELSE»
+		«(getMapping(elem, dataContainer) as ContentProviderPathDefinition).contentProviderRef.name.toFirstUpper» selectionProvider = («(getMapping(elem, dataContainer) as ContentProviderPathDefinition).contentProviderRef.name.toFirstUpper»)getApp().findContentProviderByType(«(getMapping(elem, dataContainer) as ContentProviderPathDefinition).contentProviderRef.name.toFirstUpper».class);
+		ListAdapter adapter = new CheckboxAdapter(getApp().getApplicationContext(), R.layout.checkboxlist, R.id.checkBox1, groupList, selectionProvider);
+		«ENDIF»
+		final ListView lv = (ListView) view.findViewById(R.id.«elem.name»);
+		lv.setAdapter(adapter);
+		
+		«IF elem.listtype == Listtype::PLAIN»				
+			//OnClickEvent
+			lv.setOnItemClickListener(new OnItemClickListener(){
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+						long arg3) {
+					«(getRefContentProvider(elem, dataContainer) as MappingTask).pathDefinition.contentProviderRef.name.toFirstUpper» contentProvider = («(getRefContentProvider(elem, dataContainer) as MappingTask).pathDefinition.contentProviderRef.name.toFirstUpper»)getApp().findContentProviderByType(«(getRefContentProvider(elem, dataContainer) as MappingTask).pathDefinition.contentProviderRef.name.toFirstUpper».class);
+					contentProvider.setEntity((«(elem.itemtype as ReferencedModelType).entity.name.toFirstUpper»)lv.getAdapter().getItem(arg2));
+					if(getApp().getActiveActivity() instanceof TabbedActivity) {
+						((TabbedActivity)getApp().getActiveActivity()).setSelectedTab("detailTab");
+					}
+					else {
+						Intent intent = new Intent(getApp().getActiveActivity(), de.wwu.masterthesis.reference.android.controller.MainViewActivity.class);
+						intent.putExtra("tabToShow", "detailTab");
+						getApp().getActiveActivity().startActivity(intent);
+					}	
+				}
+			 }
+			);			
+		«ENDIF»
+		
 	'''
 	
 	
@@ -553,5 +626,47 @@ class Activity {
 			ViewElementRef: viewElemType.value
 			ViewElementDef: viewElemType.value
 		}
+	}
+	
+	/**
+	 * Returns an EList containing all content elements of a container.
+	 */
+	def private static getElements(ContainerElement e)
+	{
+		switch e
+		{
+			GridLayoutPane: e.elements
+			FlowLayoutPane: e.elements
+		}
+	}
+	
+	def private static getMapping(ViewGUIElement element, DataContainer dataContainer){
+		var PathDefinition pd = null;
+		for(customAction : dataContainer.customActions)
+		{
+			for(fragment : customAction.codeFragments){
+				if(fragment instanceof MappingTask){
+					if((fragment as MappingTask).selection){
+						if((fragment as MappingTask).selection && (fragment as MappingTask).referencedViewField.ref.equals(element)){
+						pd =(fragment as MappingTask).pathDefinition;
+					}
+					}
+				}
+			}
+		}
+		pd;
+	}
+	
+	def private static getRefContentProvider(ViewGUIElement element, DataContainer dataContainer){
+		var MappingTask mt = null;
+		for(customAction : dataContainer.customActions)
+		{
+			for(fragment : customAction.codeFragments){
+				if(fragment instanceof MappingTask && !(fragment as MappingTask).selection && (fragment as MappingTask).referencedViewField.ref.equals(element)){
+					mt = fragment as MappingTask;
+				}
+			}
+		}
+		mt;
 	}
 }

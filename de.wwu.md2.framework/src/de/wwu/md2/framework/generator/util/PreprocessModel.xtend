@@ -423,7 +423,8 @@ class PreprocessModel {
 		mappingTasks = newHashSet()	
 		mappingTasks.addAll(userMappingTasks)
 		mappingTasks.addAll(autoMappingTasks)
-		mappingTasks.filter([(it.pathDefinition as ContentProviderPathDefinition).contentProviderRef.type instanceof ReferencedModelType]).forEach [ mappingTask |
+		//manipulated manually
+		mappingTasks.filter([(it.pathDefinition as ContentProviderPathDefinition).contentProviderRef.type instanceof ReferencedModelType]).filter[mappingTask| !(mappingTask.referencedViewField.resolveViewGUIElement instanceof de.wwu.md2.framework.mD2.List)].forEach[mappingTask |
 			val validatorBindingTask = modelConstraintToValidator(factory, workingInput, mappingTask)
 			val guiElem = mappingTask.referencedViewField.resolveViewGUIElement
 			userValidatorBindingTasks.forEach [ userValidatorBindingTask |
@@ -486,7 +487,7 @@ class PreprocessModel {
 								val newTask = copyElement(codeFragment) as EventBindingTask
 								newTask.events.clear
 								val newEventRef = factory.createViewElementEventRef()
-								val newAbstractRef = factory.createAbstractViewGUIElementRef()
+								val newAbstractRef = factory.createAbstractViewGUIElementRef() 
 								newAbstractRef.ref = entry.key
 								newEventRef.referencedField = newAbstractRef
 								newEventRef.event = eventRef.event

@@ -14,6 +14,7 @@
 #import "Layout.h"
 #import "EventTrigger.h"
 #import "EventHandlerProtocols.h"
+#import "ListViewWidget.h"
 @class EventHandler;
 
 @interface View : UIView
@@ -40,6 +41,7 @@
 -(void) addView: (UIView *) view identifier: (NSString *) viewIdentifier toLayout: (Layout *) layout;
 -(void) addView: (UIView *) view identifier: (NSString *) viewIdentifier rowSpan: (NSUInteger) rowSpan;
 -(void) addView: (UIView *) view identifier: (NSString *) viewIdentifier rowSpan: (NSUInteger) rowSpan toLayout: (Layout *) layout;
+-(void) addListViewWidget: (ListViewWidget *) listViewWidget identifier: (NSString *) viewIdentifier;
 
 -(id) createCombobox: (NSString *) widgetIdentifier hasDatePicker: (BOOL) hasDatePicker hasTimePicker: (BOOL) hasTimePicker hasInfoButton: (BOOL) hasInfoButton;
 -(id) createCombobox: (NSString *) widgetIdentifier options: (NSArray *) options hasInfoButton: (BOOL) hasInfoButton;
@@ -53,6 +55,7 @@
 -(id) createSpacerWidget: (NSString *) widgetIdentifier hasInfoButton: (BOOL) hasInfoButton;
 -(id) createButtonWidget: (NSString *) widgetIdentifier;
 -(id) createImageWidget: (NSString *) widgetIdentifier imageName: (NSString *) imagePath;
+-(id) createListViewWidget: (NSString *) widgetIdentifier withFrame: (CGRect) frame;
 
 -(void) replaceView: (NSString *) oldIdentifier newView: (UIView *) newView newIdentifier: (NSString *) newIdentifier;
 
@@ -63,6 +66,7 @@
 -(NSSet *) getAllCheckboxWidgets;
 -(NSSet *) getAllEntitySelectorWidgets;
 -(NSSet *) getAllLabelWidgets;
+-(NSSet *) getAllListViewWidgets;
 
 -(NSSet *) getWidgetByIdentifier: (NSString *) identifier;
 -(UIView *) getViewByIdentifier: (NSString *) identifier;

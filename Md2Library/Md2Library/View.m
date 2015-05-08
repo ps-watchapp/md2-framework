@@ -14,6 +14,7 @@
 #import "Widget.h"
 #import "WidgetFactory.h"
 #import "FlowLayout.h"
+#import "ListViewWidget.h"
 
 @implementation View
 
@@ -90,6 +91,13 @@
 -(void) addView: (UIView *) view identifier: (NSString *) viewIdentifier
 {
     [self addView: view identifier: identifier rowSpan: 1 toLayout: defaultLayout];
+}
+
+
+-(void) addListViewWidget: (ListViewWidget *) listViewWidget identifier: (NSString *) viewIdentifier
+{
+    [self addView: [listViewWidget listView] identifier: identifier rowSpan: 1 toLayout: defaultLayout];
+    [widgets addObject:listViewWidget];
 }
 
 /*
@@ -290,6 +298,15 @@
 }
 
 /*
+ *	Get all listview widgets of the view.
+ */
+-(NSSet *) getAllListViewWidgets
+{
+    NSPredicate *predicate = [NSPredicate predicateWithFormat: @"class=%@", [ListViewWidget class]];
+    return [widgets filteredSetUsingPredicate: predicate];
+}
+
+/*
 *	Get all label widgets of the view.
 */
 -(NSSet *) getAllLabelWidgets
@@ -325,6 +342,14 @@
         return self;
     
     return nil;
+}
+
+/*
+ *	Get a specific ListView by the given identifier.
+ */
+-(id) createListViewWidget: (NSString *) widgetIdentifier withFrame: (CGRect) frame
+{
+    return [WidgetFactory createListViewWidgetWithIdentifier: widgetIdentifier andFrame: frame];
 }
 
 @end

@@ -46,7 +46,7 @@ class ContentProviderClass {
 		import de.wwu.md2.android.lib.MD2Application;
 		import de.wwu.md2.android.lib.controller.actions.CodeFragment;
 		import de.wwu.md2.android.lib.controller.actions.CustomAction;
-		import de.wwu.md2.android.lib.controller.contentprovider.«parentClass»;
+		import de.wwu.md2.android.lib.controller.contentprovider.«parentClass»«IF contentProvider.type.many»Many«ELSE»Single«ENDIF»;
 		import de.wwu.md2.android.lib.controller.contentprovider.MD2DateSerializer;
 		import de.wwu.md2.android.lib.controller.contentprovider.MD2EnumDeserializer;
 		import de.wwu.md2.android.lib.controller.contentprovider.MD2EnumSerializer;
@@ -57,7 +57,7 @@ class ContentProviderClass {
 		«ENDFOR»
 		
 		@SuppressWarnings("all")
-		public class «classDef.simpleName» extends «parentClass»<«entityType»> {
+		public class «classDef.simpleName» extends «parentClass»«IF contentProvider.type.many»Many«ELSE»Single«ENDIF»<«entityType»> {
 			
 			public «classDef.simpleName»(MD2Application app) {
 				super(app, new TypeReference<«typeRefName»>() {}, «entityType».class, «contentProvider.type.many»,

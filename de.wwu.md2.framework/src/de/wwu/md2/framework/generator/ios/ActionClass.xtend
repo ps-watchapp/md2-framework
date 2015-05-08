@@ -262,7 +262,15 @@ class ActionClass
 	// TODO get attribute from content provider
 	def dispatch generateCodeFragment(MappingTask task) '''
 		«IF getViewOfGUIElement(dataContainer.viewContainers, resolveViewGUIElement(task.referencedViewField)) != null»
+			«IF resolveViewGUIElement(task.referencedViewField) instanceof de.wwu.md2.framework.mD2.List»
+				«IF !task.selection»
+				[RegisterMappingAction performAction: [RegisterMappingEvent eventWithDataMapper: [SpecificAppData «getName(getViewOfGUIElement(dataContainer.viewContainers, resolveViewGUIElement(task.referencedViewField))).toFirstLower»Controller].dataMapper contentProvider: [SpecificAppData «task.pathDefinition.contentProviderRef.name.toFirstLower»ContentProvider] dataKey: @"«getPathTailAsString(task.pathDefinition.tail)»" identifier: @"«getName(resolveViewGUIElement(task.referencedViewField))»Widget"]];
+				«ELSE»
+				[RegisterMappingAction performAction: [RegisterMappingEvent eventWithDataMapper: [SpecificAppData «getName(getViewOfGUIElement(dataContainer.viewContainers, resolveViewGUIElement(task.referencedViewField))).toFirstLower»Controller].dataMapper contentProvider: [SpecificAppData «task.pathDefinition.contentProviderRef.name.toFirstLower»ContentProvider] dataKey: @"«getPathTailAsString(task.pathDefinition.tail)»" identifier: @"«getName(resolveViewGUIElement(task.referencedViewField))»WidgetSelection"]];
+				«ENDIF»
+			«ELSE»
 			[RegisterMappingAction performAction: [RegisterMappingEvent eventWithDataMapper: [SpecificAppData «getName(getViewOfGUIElement(dataContainer.viewContainers, resolveViewGUIElement(task.referencedViewField))).toFirstLower»Controller].dataMapper contentProvider: [SpecificAppData «task.pathDefinition.contentProviderRef.name.toFirstLower»ContentProvider] dataKey: @"«getPathTailAsString(task.pathDefinition.tail)»" identifier: @"«getName(resolveViewGUIElement(task.referencedViewField))»"]];
+			«ENDIF»
 		«ENDIF»
 	'''
 	

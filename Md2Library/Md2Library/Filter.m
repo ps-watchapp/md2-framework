@@ -19,7 +19,7 @@
     if (self)
     {
         filterType = ALL;
-        predicateString = [NSString stringWithFormat: @"identifier=0"];
+        predicateString = [NSString stringWithFormat: @""];
     }
     return self;
 }

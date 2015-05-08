@@ -25,6 +25,12 @@ import static de.wwu.md2.framework.generator.android.common.ProjectProperties.*
 import static de.wwu.md2.framework.generator.android.util.MD2AndroidUtil.*
 import static de.wwu.md2.framework.generator.util.MD2GeneratorUtil.*
 import static de.wwu.md2.framework.util.MD2Util.*
+import de.wwu.md2.framework.mD2.ViewElementType
+import de.wwu.md2.framework.mD2.ViewElementRef
+import de.wwu.md2.framework.mD2.ViewElementDef
+import de.wwu.md2.framework.mD2.GridLayoutPane
+import de.wwu.md2.framework.mD2.FlowLayoutPane
+import de.wwu.md2.framework.mD2.Listtype
 
 /**
  * Android platform generator
@@ -64,6 +70,7 @@ class AndroidGenerator extends AbstractPlatformGenerator {
 		fsa.generateFileFromInputStream(getSystemResource("/android/md2-android-lib.jar"), basePackageName + "/lib/md2-android-lib.jar")
 		fsa.generateFileFromInputStream(getSystemResource("/android/jackson-all-1.9.9.jar"), basePackageName + "/lib/jackson-all-1.9.9.jar")
 		
+		
 		// Copy Icons and logos
 		fsa.generateFileFromInputStream(getSystemResource("/android/drawable-ldpi/ic_launcher.png"), basePackageName + "/res/drawable-ldpi/ic_launcher.png")
 		fsa.generateFileFromInputStream(getSystemResource("/android/drawable-mdpi/ic_launcher.png"), basePackageName + "/res/drawable-mdpi/ic_launcher.png")
@@ -73,6 +80,7 @@ class AndroidGenerator extends AbstractPlatformGenerator {
 		fsa.generateFileFromInputStream(getSystemResource("/android/drawable-mdpi/information_24px.png"), basePackageName + "/res/drawable-ldpi/information.png")
 		fsa.generateFileFromInputStream(getSystemResource("/android/drawable-hdpi/information_32px.png"), basePackageName + "/res/drawable-mdpi/information.png")
 		fsa.generateFileFromInputStream(getSystemResource("/android/drawable-xhdpi/information_32px.png"), basePackageName + "/res/drawable-xhdpi/information.png")
+		fsa.generateFileFromInputStream(getSystemResource("/android/layout/checkboxlist.xml"), basePackageName + "/res/layout/checkboxlist.xml")
 		
 		// Generate common base elements
 		fsa.generateFile(basePackageName + "/.project", dotProject(basePackageName))
@@ -190,7 +198,7 @@ class AndroidGenerator extends AbstractPlatformGenerator {
 				fsa.generateFile(basePackageName + "/src/" + basePackageName.replace('.', '/') + "/controller/" + getName(it).toFirstUpper + "Activity.java" , activityGenerator.generateTabbedActivity(basePackageName, stringsTemplate, it as TabbedAlternativesPane))
 			}
 			else {
-				fsa.generateFile(basePackageName + "/src/" + basePackageName.replace('.', '/') + "/controller/" + getName(it).toFirstUpper + "Activity.java" , activityGenerator.generateActivity(basePackageName, it))
+				fsa.generateFile(basePackageName + "/src/" + basePackageName.replace('.', '/') + "/controller/" + getName(it).toFirstUpper + "Activity.java" , activityGenerator.generateActivity(basePackageName, it, dataContainer))
 			}
 		]
 		
@@ -198,6 +206,15 @@ class AndroidGenerator extends AbstractPlatformGenerator {
 		fragments.forEach [ fragment |
 			writeJavaFile(fsa, createJavaClassDef("controller", [activityGenerator.generateFragment(it, fragment)]))
 		]
+		
+		fragments.forEach[fragment |
+			getElements(fragment).forEach[viewElemType|
+				if(getViewGUIElement(viewElemType) instanceof de.wwu.md2.framework.mD2.List && (getViewGUIElement(viewElemType) as de.wwu.md2.framework.mD2.List).listtype.value.equals(Listtype::CHECKBOX_VALUE)){
+					fsa.generateFile(basePackageName + "/src/" + basePackageName.replace('.', '/') + "/adapter/" + "CheckboxAdapter.java" , new CheckboxList().generateCheckboxList(basePackageName, getViewGUIElement(viewElemType), dataContainer));	
+				}
+			]
+		]
+
 		
 		// Generate content providers
 		dataContainer.contentProviders.forEach [
@@ -252,6 +269,32 @@ class AndroidGenerator extends AbstractPlatformGenerator {
 		classDef.subPackage = subPackage
 		classDef.contents = initializer.apply(classDef)
 		return classDef
+	}
+	
+	
+	
+		/////////////////////////////////////////
+	// Helper methods
+	/////////////////////////////////////////
+	
+	
+	def private getViewGUIElement(ViewElementType viewElemType) {
+		switch viewElemType {
+			ViewElementRef: viewElemType.value
+			ViewElementDef: viewElemType.value
+		}
+	}
+	
+	/**
+	 * Returns an EList containing all content elements of a container.
+	 */
+	def private static getElements(ContainerElement e)
+	{
+		switch e
+		{
+			GridLayoutPane: e.elements
+			FlowLayoutPane: e.elements
+		}
 	}
 	
 }

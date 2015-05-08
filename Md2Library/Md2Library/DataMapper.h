@@ -13,6 +13,7 @@
 {
     NSMutableDictionary *identifierDataKeyMapping;
     NSMutableDictionary *dataKeyContentProviderMapping;
+    ContentProvider *contentProviderMapping;
 }
 
 -(void) registerDataKeyForIdentifier: (NSString *) dateKey identifier: (NSString *) identifier contentProvider: (ContentProvider *) contentProvider;
@@ -20,7 +21,9 @@
 
 -(id) getCurrentDataObjectByIdentifier: (NSString *) identifier;
 -(id) getDataByIdentifier: (NSString *) identifier;
+-(id) getContentProviderByIdentifier: (NSString *) identifier;
 -(void) setDataByIdentifier: (id) data identifier: (NSString *) identifier;
+-(id) getSelectionByIdentifier: (NSString *) identifier;
 
 -(NSString *) getEnumStringByIdentifier: (NSString *) identifier value: (NSNumber *) value;
 -(NSArray *) getAllEnumValuesByIdentifier: (NSString *) identifier;

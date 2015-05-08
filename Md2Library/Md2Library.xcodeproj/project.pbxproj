@@ -269,6 +269,12 @@
 		9CBE6CAD17464DA700D188D7 /* DataTransferObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CBE6CAC17464DA700D188D7 /* DataTransferObject.m */; };
 		9CBE6CAE17464DDF00D188D7 /* DataTransferObject.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9CBE6CAB17464DA700D188D7 /* DataTransferObject.h */; };
 		9CBE6CB1174651A500D188D7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9CBE6CAF1746514900D188D7 /* CoreData.framework */; };
+		AEEB7E2817B3CD8E002B89F3 /* ListViewWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = AEEB7E2717B3CD8E002B89F3 /* ListViewWidget.m */; };
+		AEEB7E2A17B3D580002B89F3 /* ListViewWidget.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AEEB7E2617B3CD8E002B89F3 /* ListViewWidget.h */; };
+		AEF1AF6217856C780082FA5C /* ContentProviderSingle.m in Sources */ = {isa = PBXBuildFile; fileRef = AEF1AF5D17855CF70082FA5C /* ContentProviderSingle.m */; };
+		AEF1AF6317856C890082FA5C /* ContentProviderMany.m in Sources */ = {isa = PBXBuildFile; fileRef = AEF1AF5A17855CC90082FA5C /* ContentProviderMany.m */; };
+		AEF1AF6417856C960082FA5C /* ContentProviderSingle.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AEF1AF5C17855CF70082FA5C /* ContentProviderSingle.h */; };
+		AEF1AF6517856CAC0082FA5C /* ContentProviderMany.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AEF1AF5917855CC90082FA5C /* ContentProviderMany.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -278,6 +284,9 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				AEEB7E2A17B3D580002B89F3 /* ListViewWidget.h in CopyFiles */,
+				AEF1AF6517856CAC0082FA5C /* ContentProviderMany.h in CopyFiles */,
+				AEF1AF6417856C960082FA5C /* ContentProviderSingle.h in CopyFiles */,
 				9CB6DC77174E07D300712926 /* AppData.h in CopyFiles */,
 				9CB6DC78174E07D300712926 /* InitializeApplicationAction.h in CopyFiles */,
 				9C6CBD7F174D284100011C89 /* AppDelegateProtocols.h in CopyFiles */,
@@ -692,6 +701,12 @@
 		9CBE6CAB17464DA700D188D7 /* DataTransferObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataTransferObject.h; sourceTree = "<group>"; };
 		9CBE6CAC17464DA700D188D7 /* DataTransferObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataTransferObject.m; sourceTree = "<group>"; };
 		9CBE6CAF1746514900D188D7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		AEEB7E2617B3CD8E002B89F3 /* ListViewWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListViewWidget.h; sourceTree = "<group>"; };
+		AEEB7E2717B3CD8E002B89F3 /* ListViewWidget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListViewWidget.m; sourceTree = "<group>"; };
+		AEF1AF5917855CC90082FA5C /* ContentProviderMany.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContentProviderMany.h; sourceTree = "<group>"; };
+		AEF1AF5A17855CC90082FA5C /* ContentProviderMany.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContentProviderMany.m; sourceTree = "<group>"; };
+		AEF1AF5C17855CF70082FA5C /* ContentProviderSingle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContentProviderSingle.h; sourceTree = "<group>"; };
+		AEF1AF5D17855CF70082FA5C /* ContentProviderSingle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContentProviderSingle.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -749,8 +764,10 @@
 				9C6CBBB5174D1B0D00011C89 /* HelpView.m */,
 				9C6CBBB6174D1B0D00011C89 /* PickerView.h */,
 				9C6CBBB7174D1B0D00011C89 /* PickerView.m */,
+				9C6CBBD3174D1BB700011C89 /* Actions */,
 				9C6CBBB8174D1B0D00011C89 /* View.h */,
 				9C6CBBB9174D1B0D00011C89 /* View.m */,
+				9C6CBD6F174D21C300011C89 /* AppDelegate.h */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -780,6 +797,8 @@
 				9C6CBB8C174D18D200011C89 /* Widget.m */,
 				9C6CBB8D174D18D200011C89 /* WidgetFactory.h */,
 				9C6CBB8E174D18D200011C89 /* WidgetFactory.m */,
+				AEEB7E2617B3CD8E002B89F3 /* ListViewWidget.h */,
+				AEEB7E2717B3CD8E002B89F3 /* ListViewWidget.m */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -849,10 +868,8 @@
 		9C6CBBD2174D1BAF00011C89 /* ActionHandling */ = {
 			isa = PBXGroup;
 			children = (
-				9C6CBBD3174D1BB700011C89 /* Actions */,
 				9CB6DC72174E03F600712926 /* AppData.h */,
 				9CB6DC73174E03F600712926 /* AppData.m */,
-				9C6CBD6F174D21C300011C89 /* AppDelegate.h */,
 				9C6CBD70174D21C300011C89 /* AppDelegate.m */,
 				9C6CBD7E174D25CB00011C89 /* AppDelegateProtocols.h */,
 				9CB6DC76174E07AA00712926 /* InitializeApplicationAction.h */,
@@ -937,6 +954,10 @@
 				9C6CBC7A174D1CE500011C89 /* GPSContentProvider.m */,
 				9C6CBC67174D1CA500011C89 /* Utilities.h */,
 				9C6CBC68174D1CA500011C89 /* Utilities.m */,
+				AEF1AF5917855CC90082FA5C /* ContentProviderMany.h */,
+				AEF1AF5A17855CC90082FA5C /* ContentProviderMany.m */,
+				AEF1AF5C17855CF70082FA5C /* ContentProviderSingle.h */,
+				AEF1AF5D17855CF70082FA5C /* ContentProviderSingle.m */,
 			);
 			name = ContentProvider;
 			sourceTree = "<group>";
@@ -1195,6 +1216,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AEF1AF6317856C890082FA5C /* ContentProviderMany.m in Sources */,
+				AEF1AF6217856C780082FA5C /* ContentProviderSingle.m in Sources */,
 				9CBE6CAD17464DA700D188D7 /* DataTransferObject.m in Sources */,
 				9C6CBB8F174D18D200011C89 /* ButtonWidget.m in Sources */,
 				9C6CBB90174D18D200011C89 /* CheckboxWidget.m in Sources */,
@@ -1321,6 +1344,7 @@
 				9C6CBD75174D222C00011C89 /* StylesheetCategory.m in Sources */,
 				9C6CBD7D174D258200011C89 /* LocalizedStringAccess.m in Sources */,
 				9CB6DC74174E03F600712926 /* AppData.m in Sources */,
+				AEEB7E2817B3CD8E002B89F3 /* ListViewWidget.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

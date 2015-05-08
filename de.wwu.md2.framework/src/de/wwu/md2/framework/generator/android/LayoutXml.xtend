@@ -25,6 +25,7 @@ import de.wwu.md2.framework.mD2.Tooltip
 import de.wwu.md2.framework.mD2.ViewElementDef
 import de.wwu.md2.framework.mD2.ViewElementRef
 import de.wwu.md2.framework.mD2.ViewElementType
+import de.wwu.md2.framework.mD2.List
 import java.util.Collection
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.Property
@@ -221,6 +222,14 @@ class LayoutXml {
 		generateToolTip(getName(elem))
 	}
 	
+	def private dispatch CharSequence generateElem(List elem)'''
+		<ListView
+		android:id="@+id/«getName(elem)»"
+		android:layout_width="match_parent"
+		android:layout_height="517dp"
+		android:drawSelectorOnTop="false" />		
+	'''
+	
 	
 	def generateToolTip(String name) '''
 		<ImageButton 
@@ -298,6 +307,10 @@ class LayoutXml {
 	'''
 	
 	def private dispatch CharSequence generateElem(FlowLayoutPane elem) '''
+		<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/detailTab"
+			style="@style/ContainerDefault"
+			android:orientation="vertical">
 		<LinearLayout«if (!checkIsRootGenerated) ' xmlns:android="http://schemas.android.com/apk/res/android"'»
 			android:id="@+id/«getName(elem)»"
 			style="@style/ContainerDefault"
@@ -308,6 +321,7 @@ class LayoutXml {
 			«ENDFOR»
 			
 		</LinearLayout>
+		</ScrollView>
 	'''
 	
 	def private dispatch CharSequence generateElem(AlternativesPane elem) '''

@@ -1,7 +1,6 @@
 package de.wwu.md2.framework.generator.android
 
 import de.wwu.md2.framework.generator.util.DataContainer
-import de.wwu.md2.framework.mD2.AbstractViewGUIElementRef
 import de.wwu.md2.framework.mD2.ActionReference
 import de.wwu.md2.framework.mD2.AllowedOperation
 import de.wwu.md2.framework.mD2.AssignObjectAtContentProviderAction
@@ -90,6 +89,7 @@ class CustomActionTemplate {
 		import android.widget.CheckBox;
 		import android.widget.Spinner;
 		import android.widget.TextView;
+		import android.widget.ListView;
 		import de.wwu.md2.android.lib.MD2Application;
 		import de.wwu.md2.android.lib.controller.actions.*;
 		import de.wwu.md2.android.lib.controller.binding.CheckBoxMapping;
@@ -100,6 +100,7 @@ class CustomActionTemplate {
 		import de.wwu.md2.android.lib.controller.binding.PathResolver;
 		import de.wwu.md2.android.lib.controller.binding.SpinnerMapping;
 		import de.wwu.md2.android.lib.controller.binding.StringTextViewMapping;
+		import de.wwu.md2.android.lib.controller.binding.ListViewMapping;
 		import de.wwu.md2.android.lib.controller.contentprovider.GPSAddressProvider;
 		import de.wwu.md2.android.lib.controller.contentprovider.GPSAddressProvider.GPSAddressReceiver;
 		import de.wwu.md2.android.lib.controller.events.MD2EventHandler;
@@ -127,28 +128,28 @@ class CustomActionTemplate {
 			@Override
 			protected void initializeCodeFragments() {
 				
-				«action.codeFragments.map[codeFragment | generateCodeFragment(codeFragment)].filter[it!=null && it.length > 0].join('\n')»
-				
+				«FOR codeFragment : action.codeFragments»
+					«generateCodeFragment(codeFragment)»
+					
+				«ENDFOR»
 			}
 		}
+		
 	'''
 	
-	def private dispatch generateCodeFragment(MappingTask task) {
-		val topLevelView = getViewOfGUIElement(topLevelViewContainers, resolveViewGUIElement(task.referencedViewField))
-		val activityName = if(topLevelView == null) null else getName(topLevelView).toFirstUpper
-		/*
-		 * Check if this code fragment is related to a view element contained in an activity or fragment that has not been generated (empty name),
-		 * because it will never be used (usually view containers that are defined on the top level and are referenced inside other view containers)
-		 */
-		if(activityName != null && activityName.length != 0) '''
-			addCodeFragment(new CodeFragment() {
-				@Override
-				public String getActivityName() {
-					return "«activityName»";
-				}
-				
-				@Override
-				public void execute(MD2Application app) {
+	def private dispatch generateCodeFragment(MappingTask task) '''
+		«val topLevelView = getViewOfGUIElement(topLevelViewContainers, resolveViewGUIElement(task.referencedViewField))»
+		«val activityName = if(topLevelView == null) null else getName(topLevelView).toFirstUpper»
+		addCodeFragment(new CodeFragment() {
+			
+			@Override
+			public String getActivityName() {
+				return «IF activityName != null && activityName.length != 0»"«activityName»"«ELSE»null«ENDIF»;
+			}
+			
+			@Override
+			public void execute(MD2Application app) {
+				«IF activityName != null && activityName.length != 0»
 					«val widget = resolveViewGUIElement(task.referencedViewField)»
 					«val attributePath = getPathTailAsList(task.pathDefinition.tail)»
 					«val entityClass = getTypeName(task.pathDefinition.contentProviderRef.type)»
@@ -156,12 +157,39 @@ class CustomActionTemplate {
 						TextInput: textViewMapTask(task.pathDefinition.contentProviderRef, entityClass, widget, attributePath)
 						OptionInput: spinnerMapTask(task.pathDefinition.contentProviderRef, entityClass, widget, attributePath)
 						CheckBox: checkBoxMapTask(task.pathDefinition.contentProviderRef, entityClass, widget, attributePath)
+						de.wwu.md2.framework.mD2.List: ListMapTask(task.pathDefinition.contentProviderRef, entityClass, widget, attributePath)
 						default: "// TODO Mapper for " + widget.eClass.name
 					}»
-				}
-			});
-		'''
-	}
+				«ELSE»
+					// This code fragment is related to a view element contained in an activity or fragment
+					// that has not been generated, because it will never be used (usually view containers
+					// that are defined on the top level and are referenced inside other view containers)
+				«ENDIF»
+			}
+			
+		});
+	'''
+	
+	def ListMapTask(ContentProvider contentProviderRef, String entityClass, de.wwu.md2.framework.mD2.List view, List<Attribute> attributePath) '''
+			app.getMappings().add(
+				new ListViewMapping<«entityClass»>(
+					(ListView) app.getActiveActivity().findViewById(R.id.«getName(view)»),
+					app.findContentProviderByType(«contentProviderRef.name.toFirstUpper».class),
+					new PathResolver<«entityClass», Integer>() {
+						public Integer retrieveValue(«entityClass» entity) {
+							return null;
+						}
+						
+						public void adaptValue(«entityClass» entity, Integer value) {
+							//empty
+						}
+					},
+					app.getEventBus(),
+					"«getName(view)»",
+					getActivityName()
+				)
+			);
+	'''
 	
 	def private dispatch generateCodeFragment(UnmappingTask task) '''
 		// TODO UnmappingTask
@@ -169,6 +197,7 @@ class CustomActionTemplate {
 	
 	def private dispatch generateCodeFragment(CallTask task) '''
 		addCodeFragment(new CodeFragment() {
+			
 			@Override
 			public String getActivityName() {
 				return null;
@@ -182,6 +211,7 @@ class CustomActionTemplate {
 					SimpleActionRef: getSimpleActionCode(action.action)
 				}»
 			}
+			
 		});
 	'''
 	
@@ -189,6 +219,7 @@ class CustomActionTemplate {
 		«FOR event : task.events»
 			«val eventName = getEventName(event)»
 			addCodeFragment(new CodeFragment() {
+				
 				@Override
 				public String getActivityName() {
 					return null;
@@ -196,6 +227,7 @@ class CustomActionTemplate {
 				
 				@Override
 				public void execute(final MD2Application app) {
+					
 					«FOR action : task.actions»
 						«var actionName = ""»
 						«var actionInitialization = ''''''»
@@ -211,9 +243,12 @@ class CustomActionTemplate {
 								null
 							}
 						}»
+						
 						app.getEventBus().subscribe("«eventName»", "«eventName»_«actionName»", «actionInitialization»);
 					«ENDFOR»
+			
 				}
+				
 			});
 		«ENDFOR»
 	'''
@@ -222,6 +257,7 @@ class CustomActionTemplate {
 		«FOR event : task.events»
 			«val eventName = getEventName(event)»
 			addCodeFragment(new CodeFragment() {
+				
 				@Override
 				public String getActivityName() {
 					return null;
@@ -229,51 +265,57 @@ class CustomActionTemplate {
 				
 				@Override
 				public void execute(MD2Application app) {
+					
 					«FOR action : task.actions»
 						«val actionName = switch action {
 							ActionReference: getName(action.actionRef).toFirstUpper
 							SimpleActionRef: action.action.eClass.name + getUniqueSimpleActionIdentifier(action.action)
 						}»
+						
 						app.getEventBus().unsubscribe("«eventName»", "«eventName»_«actionName»");
 					«ENDFOR»
+			
 				}
+				
 			});
 		«ENDFOR»
 	'''
 	
-	def private dispatch generateCodeFragment(ValidatorBindingTask task) {
-		task.referencedFields.map[abstractView | generateValidatorBindingFragment(task, abstractView)].filter[it!=null].join('\n')
-	}
-	
-	def private generateValidatorBindingFragment(ValidatorBindingTask task, AbstractViewGUIElementRef abstractView) {
-		val topLevelView = getViewOfGUIElement(topLevelViewContainers, resolveViewGUIElement(abstractView))
-		val activityName = if(topLevelView == null) null else getName(topLevelView).toFirstUpper
-		/*
-		 * Check if this code fragment is related to a view element contained in an activity or fragment that has not been generated (empty name),
-		 * because it will never be used (usually view containers that are defined on the top level and are referenced inside other view containers)
-		 */
-		if(activityName != null && activityName.length != 0) '''
+	def private dispatch generateCodeFragment(ValidatorBindingTask task) '''
+		«FOR abstractView : task.referencedFields»
+			«val topLevelView = getViewOfGUIElement(topLevelViewContainers, resolveViewGUIElement(abstractView))»
+			«val activityName = if(topLevelView == null) null else getName(topLevelView).toFirstUpper»
 			addCodeFragment(new CodeFragment() {
+				
 				@Override
 				public String getActivityName() {
-					return "«activityName»";
+					return «IF activityName != null && activityName.length != 0»"«activityName»"«ELSE»null«ENDIF»;
 				}
 				
 				@Override
 				public void execute(MD2Application app) {
-					«val viewElem = resolveViewGUIElement(abstractView)»
-					«FOR validatorType : task.validators»
-						«IF validatorType instanceof StandardValidatorType»
-							«val validator = (validatorType as StandardValidatorType).validator»
-							«generateStandardValidator(validator, viewElem)»
-						«ELSE»
-							// TODO Generate custom validators
-						«ENDIF»
-					«ENDFOR»
+					
+					«IF activityName != null && activityName.length != 0»
+						«val viewElem = resolveViewGUIElement(abstractView)»
+						«FOR validatorType : task.validators»
+							«IF validatorType instanceof StandardValidatorType»
+								«val validator = (validatorType as StandardValidatorType).validator»
+								«generateStandardValidator(validator, viewElem)»
+								
+							«ELSE»
+								// TODO Generate custom validators
+							«ENDIF»
+						«ENDFOR»
+					«ELSE»
+						// This code fragment is related to a view element contained in an activity or fragment
+						// that has not been generated, because it will never be used (usually view containers
+						// that are defined on the top level and are referenced inside other view containers)
+					«ENDIF»
 				}
+				
 			});
-		'''
-	}
+		«ENDFOR»
+	'''
 	
 	def private dispatch generateCodeFragment(ValidatorUnbindTask task) '''
 		// TODO ValidatorUnbindTask
@@ -398,6 +440,7 @@ class CustomActionTemplate {
 	
 	def private getGPSUpdateCode(GPSUpdateAction action) '''
 		GPSAddressReceiver receiver = new GPSAddressReceiver() {
+			
 			@Override
 			public void receiveGPSAddress(MD2Application app, Address address, Location location) {
 				StringBuilder sb;
@@ -477,6 +520,7 @@ class CustomActionTemplate {
 	
 	def private CharSequence getSimpleActionAsEventHandler(SimpleAction simpleAction) '''
 		new MD2EventHandler() {
+			
 			@Override
 			public void eventOccured() {
 				«getSimpleActionCode(simpleAction)»

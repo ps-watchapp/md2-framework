@@ -60,8 +60,8 @@
         [DatabaseAccess printDetailedErrorDescription];
     
     // Revert local changes for all fetched objects
-    for(NSManagedObject *cur in dataObjects)
-        [cur revertLocalChanges];
+   // for(NSManagedObject *cur in dataObjects)
+    //    [cur revertLocalChanges];
     
     NSManagedObject *foundObject = nil;
     if (dataObjectIdentifier != nil)
@@ -73,9 +73,15 @@
         dataObject = foundObject;
     else
     {
-        LocalCreateRequest *request = [[LocalCreateRequest alloc] initWithDataObjectName: dataObjectName];
-        [request execute];
-        dataObject = request.dataObject;
+        if([dataObjects count] > 0){
+            dataObject = [dataObjects lastObject];
+        }
+        else {
+           // LocalCreateRequest *request = [[LocalCreateRequest alloc] initWithDataObjectName: dataObjectName];
+           // [request execute];
+           // dataObject = request.dataObject;
+        }
+        
     }
     dataObjectIdentifier = ((DataTransferObject *) dataObject).identifier;
     

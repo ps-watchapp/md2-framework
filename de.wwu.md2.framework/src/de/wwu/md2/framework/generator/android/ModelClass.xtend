@@ -3,6 +3,7 @@ package de.wwu.md2.framework.generator.android
 import de.wwu.md2.framework.mD2.Entity
 import de.wwu.md2.framework.mD2.Enum
 import de.wwu.md2.framework.mD2.ReferencedType
+import java.security.InvalidParameterException
 
 import static de.wwu.md2.framework.generator.android.util.MD2AndroidUtil.*
 import static de.wwu.md2.framework.generator.util.MD2GeneratorUtil.*
@@ -43,7 +44,11 @@ class ModelClass {
 			@JsonDeserialize
 			private int __internalId;
 			«FOR attribute : entity.attributes»
-				private «attributeTypeName(entity, attribute)» «attribute.name»;
+				private«IF (attribute.type instanceof ReferencedType && (attribute.type as ReferencedType).entity instanceof Entity && attribute.type.many)»
+				ArrayList<«attributeTypeName(entity, attribute)»> «attribute.name»;
+						«ELSE»
+							«attributeTypeName(entity, attribute)» «attribute.name»;
+						«ENDIF»
 			«ENDFOR»
 			
 			public «entity.name»() {
@@ -52,7 +57,7 @@ class ModelClass {
 			
 			private void applyDefaults() {
 				__internalId = -1;
-				«entity.attributes.filter([typeof(ReferencedType).isInstance(it.type) && (typeof(Enum).isInstance((it.type as ReferencedType).entity) || typeof(Entity).isInstance((it.type as ReferencedType).entity))]).join('\n', ['''set«it.name.toFirstUpper»(new «attributeTypeName(it)»());'''])»
+				«entity.attributes.filter([typeof(ReferencedType).isInstance(it.type)  && (typeof(Enum).isInstance((it.type as ReferencedType).entity) || typeof(Entity).isInstance((it.type as ReferencedType).entity))]).join('\n', ['''set«it.name.toFirstUpper»(new «attributeTypeName(it)»());'''])»
 			}
 			
 			@JsonIgnore
@@ -66,21 +71,36 @@ class ModelClass {
 			}
 			
 			«FOR attribute : entity.attributes»
-				public «attributeTypeName(entity, attribute)» get«attribute.name.toFirstUpper»() {
-					return this.«attribute.name»;
-				}
+			
+				«IF (attribute.type instanceof ReferencedType && (attribute.type as ReferencedType).entity instanceof Entity && attribute.type.many)»
+			
+					public ArrayList<«attributeTypeName(entity, attribute)»> get«attribute.name.toFirstUpper»() {
+						return this.«attribute.name»;
+					}
 				
-				public void set«attribute.name.toFirstUpper»(«attributeTypeName(entity, attribute)» value) {
-					this.«attribute.name» = value;
-				}
+					public void set«attribute.name.toFirstUpper»(ArrayList<«attributeTypeName(entity, attribute)»> value) {
+						this.«attribute.name» = value;
+					}
+				«ELSE»
+					public «attributeTypeName(entity, attribute)» get«attribute.name.toFirstUpper»() {
+						return this.«attribute.name»;
+					}
+				
+					public void set«attribute.name.toFirstUpper»(«attributeTypeName(entity, attribute)» value) {
+						this.«attribute.name» = value;
+					}
+				«ENDIF»
 				
 			«ENDFOR»
+			public String toString(){
+				this.name;
+			}
 		}
 	'''
 	
 	def static dispatch createClass(Enum md2Enum, String basePackage) {
-		if (md2Enum == null) throw new IllegalArgumentException("md2Enum cannot be nil")
-		if (md2Enum.enumBody == null) throw new IllegalArgumentException("Enum "+md2Enum.name+"'s enumBody cannot be empty")
+		if (md2Enum == null) throw new InvalidParameterException("md2Enum cannot be nil")
+		if (md2Enum.enumBody == null) throw new InvalidParameterException("Enum "+md2Enum.name+"'s enumBody cannot be empty")
 		
 		'''
 		package «basePackage».models;

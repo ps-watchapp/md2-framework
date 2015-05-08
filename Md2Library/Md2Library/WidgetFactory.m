@@ -187,4 +187,15 @@
     return imageWidget;
 }
 
+/*
+ *	Creates a ListView widget by the given identifier.
+ */
++(ListViewWidget *) createListViewWidgetWithIdentifier: (NSString *) identifier andFrame: (CGRect) frame
+{
+    ListViewWidget *listViewWidget = [[ListViewWidget alloc] initWithFrame: (CGRect) frame];
+    listViewWidget.identifier = identifier;
+    
+    return listViewWidget;
+}
+
 @end

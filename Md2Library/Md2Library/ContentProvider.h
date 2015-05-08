@@ -30,7 +30,7 @@
     NSURL *remoteURL;
     
     NSManagedObject *currentDataObject;
-    NSArray *currentDataObjects;
+   // NSArray *currentDataObjects;
     
     NSMutableDictionary *linkedContentProviders;
 }
@@ -47,5 +47,6 @@
 -(void) persistDataObject;
 -(void) removeDataObject;
 -(void) createNewDataObject;
+-(NSNumber *) getCurrentObjectId;
 
 @end

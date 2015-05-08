@@ -219,7 +219,7 @@ class IOSGenerator extends AbstractPlatformGenerator
 			try
 			{
 				fsa.generateFile(projectFolder + "/" + getName(container).toFirstUpper + "View.h" , createViewH(container))
-				fsa.generateFile(projectFolder + "/" + getName(container).toFirstUpper + "View.m" , createViewM(container))
+				fsa.generateFile(projectFolder + "/" + getName(container).toFirstUpper + "View.m" , createViewM(container, dataContainer))
 				fsa.generateFile(projectFolder + "/" + getName(container).toFirstUpper + "Controller.h" , createControllerH(container))
 				fsa.generateFile(projectFolder + "/" + getName(container).toFirstUpper + "Controller.m" , createControllerM(container, dataContainer))
 				

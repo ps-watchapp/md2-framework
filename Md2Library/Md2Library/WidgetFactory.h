@@ -17,6 +17,7 @@
 #import "ImageWidget.h"
 #import "CheckboxWidget.h"
 #import "EntitySelectorWidget.h"
+#import "ListViewWidget.h"
 
 @interface WidgetFactory : NSObject
 	
@@ -32,5 +33,6 @@
 +(LabelWidget *) createSpacerWidgetWithIdentifier: (NSString *) identifier hasInfoButton: (BOOL) hasInfoButton;
 +(ButtonWidget *) createButtonWidgetWithIdentifier: (NSString *) identifier;
 +(ImageWidget *) createImageWidgetWithIdentifier: (NSString *) identifier imageName: (NSString *) imageName;
++(ListViewWidget *) createListViewWidgetWithIdentifier: (NSString *) identifier andFrame: (CGRect) frame;
 
 @end

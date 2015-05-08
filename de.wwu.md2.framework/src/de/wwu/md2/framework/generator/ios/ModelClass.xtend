@@ -29,6 +29,14 @@ class ModelClass {
 			«IF getEntityNames(entity, attribute) != null»#import "«getEntityNames(entity, attribute)».h"«ENDIF»
 		«ENDFOR»
 		
+		«IF entity.attributes.exists(a | a.type.many)»
+			«FOR attribute : entity.attributes»
+				«IF (attribute.type instanceof ReferencedType && (attribute.type as ReferencedType).entity instanceof Entity && attribute.type.many)»
+					@class «(attribute.type as ReferencedType).entity.name.toFirstUpper»Entity;
+				«ENDIF»
+			«ENDFOR»
+		«ENDIF»
+		
 		@interface «entity.name.toFirstUpper»Entity : DataTransferObject
 		
 		«FOR attribute : entity.attributes»
@@ -41,7 +49,7 @@ class ModelClass {
 			// methods for the handling of "to many" relationships
 			@interface «entity.name.toFirstUpper»Entity (CoreDataGeneratedAccessors)
 			
-			«FOR attribute : entity.attributes»
+				«FOR attribute : entity.attributes»
 				«IF (attribute.type instanceof ReferencedType && (attribute.type as ReferencedType).entity instanceof Entity && attribute.type.many)»
 					- (void) add«attribute.name.toFirstUpper»Object: («(attribute.type as ReferencedType).entity.name.toFirstUpper»Entity *) value;
 					- (void) remove«attribute.name.toFirstUpper»Object: («(attribute.type as ReferencedType).entity.name.toFirstUpper»Entity *) value;

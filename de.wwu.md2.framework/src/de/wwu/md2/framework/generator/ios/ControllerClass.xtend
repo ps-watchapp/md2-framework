@@ -5,6 +5,7 @@ import de.wwu.md2.framework.mD2.ContainerElement
 import java.util.Date
 
 import static de.wwu.md2.framework.generator.util.MD2GeneratorUtil.*
+import java.util.List
 
 class ControllerClass
 {
@@ -47,6 +48,12 @@ class ControllerClass
 			}
 			return self;
 		}
+
+
+		-(void) viewWillAppear:(BOOL)animated{
+			[self loadView];
+		}	
+
 		
 		@end'''
 }

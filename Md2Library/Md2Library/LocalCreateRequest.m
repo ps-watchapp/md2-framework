@@ -38,8 +38,9 @@ static int OBJECT_IDENTIFIER_COUNTER = 0;
 
 -(void) execute
 {
-    NSEntityDescription *entity = [NSEntityDescription entityForName: dataObjectName inManagedObjectContext: [DatabaseAccess context]];
-    dataObject = [[NSManagedObject alloc] initWithEntity: entity insertIntoManagedObjectContext: [DatabaseAccess context]];
+    //NSEntityDescription *entity = [NSEntityDescription entityForName: dataObjectName inManagedObjectContext: [DatabaseAccess context]];
+    //dataObject = [[NSManagedObject alloc] initWithEntity: entity insertIntoManagedObjectContext: [DatabaseAccess context]];
+    dataObject = [NSEntityDescription insertNewObjectForEntityForName:dataObjectName inManagedObjectContext:[DatabaseAccess context]];
     ((DataTransferObject *) dataObject).identifier = [NSNumber numberWithInt: OBJECT_IDENTIFIER_COUNTER++];
     ((DataTransferObject *) dataObject).createdDate = [NSDate date];
     
@@ -48,18 +49,22 @@ static int OBJECT_IDENTIFIER_COUNTER = 0;
     {
         for (NSString *relationshipName in relationships.keyEnumerator)
         {
-            NSRelationshipDescription *relation = ((NSRelationshipDescription *) [relationships objectForKey: relationshipName]);
-            NSEntityDescription *linkedEntity = [NSEntityDescription entityForName: relation.destinationEntity.name inManagedObjectContext: [DatabaseAccess context]];
-            NSManagedObject *object = [[NSManagedObject alloc] initWithEntity: linkedEntity insertIntoManagedObjectContext: [DatabaseAccess context]];
+            //NSRelationshipDescription *relation = ((NSRelationshipDescription *) [relationships objectForKey: relationshipName]);
+            //NSEntityDescription *linkedEntity = [NSEntityDescription entityForName: relation.destinationEntity.name inManagedObjectContext: [DatabaseAccess context]];
+            //NSManagedObject *object = [[NSManagedObject alloc] initWithEntity: linkedEntity insertIntoManagedObjectContext: [DatabaseAccess context]];
             
-            if (relation.isToMany)
+           /* if (relation.isToMany)
             {
                 NSMutableSet *objects = [[NSMutableSet alloc] init];
                 [objects addObject: object];
                 [dataObject setValue: objects forKey: relationshipName];
             }
             else
-                [dataObject setValue: object forKey: relationshipName];
+                [dataObject setValue: object forKey: relationshipName];*/
+            
+            //if(!relation.isToMany){
+            //    [dataObject setValue: object forKey: relationshipName];
+            //}
         }
     }
     currentDataObjectID = dataObject.objectID;

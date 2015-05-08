@@ -16,9 +16,9 @@ class ContentProviderClass
 		//  Copyright (c) 2012 Uni-Muenster. All rights reserved.
 		//
 		
-		#import "«IOSGenerator::md2LibraryImport»/ContentProvider.h"
+		#import "«IOSGenerator::md2LibraryImport»/ContentProvider«IF cp.type.many»Many«ELSE»Single«ENDIF».h"
 		
-		@interface «cp.name.toFirstUpper»ContentProvider : ContentProvider
+		@interface «cp.name.toFirstUpper»ContentProvider : ContentProvider«IF cp.type.many»Many«ELSE»Single«ENDIF»
 		@end'''
 		
 	def static createContentProviderM(ContentProvider cp, DataContainer dataContainer) '''

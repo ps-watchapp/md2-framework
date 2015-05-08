@@ -26,5 +26,6 @@
 @property (retain, nonatomic) NSString *identifier;
 
 +(id) eventWithDataMapper: (DataMapper *) dataMapper contentProvider: (ContentProvider *) contentProvider dataKey: (NSString *) dataKey identifier: (NSString *) identifier;
++(id) eventWithDataMapper: (DataMapper *) dataMapper contentProvider: (ContentProvider *) contentProvider identifier: (NSString *) identifier;
 
 @end

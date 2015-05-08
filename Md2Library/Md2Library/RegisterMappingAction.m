@@ -18,4 +18,11 @@
     [_event.dataMapper registerDataKeyForIdentifier: _event.dataKey identifier: _event.identifier contentProvider: _event.contentProvider];
 }
 
+//+(void) performViewAction: (Event *) event
+//{
+//    RegisterMappingEvent *_event = (RegisterMappingEvent *) event;
+    
+//    [_event.dataMapper registerDataKeyForIdentifier: _event.dataKey identifier: _event.identifier contentProvider: _event.contentProvider];
+//}
+
 @end

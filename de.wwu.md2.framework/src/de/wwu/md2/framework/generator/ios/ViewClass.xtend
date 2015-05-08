@@ -23,12 +23,21 @@ import de.wwu.md2.framework.mD2.Tooltip
 import de.wwu.md2.framework.mD2.ViewElementDef
 import de.wwu.md2.framework.mD2.ViewElementRef
 import de.wwu.md2.framework.mD2.ViewElementType
+import de.wwu.md2.framework.mD2.List
 import java.util.Date
 
 import static de.wwu.md2.framework.generator.util.MD2GeneratorUtil.*
+import de.wwu.md2.framework.mD2.ReferencedModelType
+import de.wwu.md2.framework.generator.util.DataContainer
+import de.wwu.md2.framework.mD2.CustomAction
+import de.wwu.md2.framework.mD2.MappingTask
+import de.wwu.md2.framework.mD2.PathDefinition
+import de.wwu.md2.framework.mD2.ViewGUIElement
+import de.wwu.md2.framework.mD2.Entity
 
 class ViewClass
 {
+	
 	def static createViewH(ContainerElement e) '''
 		//
 		//  «getName(e).toFirstUpper»View.h
@@ -39,10 +48,13 @@ class ViewClass
 		
 		#import "«IOSGenerator::md2LibraryImport»/View.h"
 		
-		@interface «getName(e).toFirstUpper»View : View
+		@interface «getName(e).toFirstUpper»View : View{
+			ListViewWidget *listViewWidget;
+		}
+		
 		@end'''
 	
-	def static createViewM(ContainerElement e) '''
+	def static createViewM(ContainerElement e, DataContainer dataContainer) '''
 		//
 		//  «getName(e).toFirstUpper»View.m
 		//
@@ -53,6 +65,19 @@ class ViewClass
 		#import "«getName(e).toFirstUpper»View.h"
 		«FOR layout : preCalculateImports(e)»
 			#import "«layout».h"
+		«ENDFOR»
+		
+		«FOR contentElement : getElements(e)»
+			«IF getViewGUIElement(contentElement) instanceof List»
+			#import "«((getViewGUIElement(contentElement)as List).itemtype as ReferencedModelType).entity.name.toFirstUpper»Entity.h"
+			#import "SpecificAppData.h"
+			#import "«IOSGenerator::md2LibraryImport»/GotoControllerAction.h"
+			#import "«IOSGenerator::md2LibraryImport»/ListViewWidget.h"
+			«IF (getViewGUIElement(contentElement) as List).listtype.value == 1»
+				#import "«((getMapping(getViewGUIElement(contentElement), dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name»Entity.h"
+			«ENDIF»
+			#import "«IOSGenerator::md2LibraryImport»/EventHandler.h"
+			«ENDIF»
 		«ENDFOR»
 		
 		@implementation «getName(e).toFirstUpper»View
@@ -81,6 +106,13 @@ class ViewClass
 			
 			[contentView addSubview: defaultLayout];
 		}
+		
+		«FOR contentElement : getElements(e)»
+			«IF getViewGUIElement(contentElement) instanceof List»
+				«listUtil(getViewGUIElement(contentElement) as List, dataContainer)»
+			«ENDIF»
+		«ENDFOR»
+				 
 		
 		@end'''
 	
@@ -129,6 +161,21 @@ class ViewClass
 	
 	def static dispatch CharSequence generateContentElem(Tooltip elem, String toLayout) '''
 		[self addWidget: [self createSpacerWidget: @"«getName(elem)»" hasInfoButton: YES]«setToLayout(toLayout)»];
+	'''
+	
+	def static dispatch CharSequence generateContentElem(List elem, String toLayout)'''
+		if(listViewWidget == nil){
+			listViewWidget = [self createListViewWidget:@"«getName(elem)»Widget" withFrame:contentView.bounds];
+		}
+		UITableView *tableView = [listViewWidget listView];
+	
+		tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+		tableView.delegate = self;
+		tableView.dataSource = self;
+		[tableView reloadData];
+	
+	
+		[self addListViewWidget: listViewWidget identifier:@"«getName(elem)»"];
 	'''
 	
 	//TODO: Adapt MultiPane to newest changes of entity selector
@@ -272,4 +319,89 @@ class ViewClass
 		}
 		newArrayList(e1, e2, e3)
 	}
+
+
+
+/////////////////////////////////////////////////////////////////////
+// List Helper
+////////////////////////////////////////////////////////////////////
+
+def private static getMapping(ViewGUIElement element, DataContainer dataContainer){
+	var PathDefinition pd = null;
+	for(customAction : dataContainer.customActions)
+	{
+		for(fragment : customAction.codeFragments){
+			if(fragment instanceof MappingTask){
+				if((fragment as MappingTask).selection){
+					if((fragment as MappingTask).selection && (fragment as MappingTask).referencedViewField.ref.equals(element)){
+					pd =(fragment as MappingTask).pathDefinition;
+				}
+				}
+			}
+		}
+	}
+	pd;
 }
+
+def private static listUtil(List listElement, DataContainer dataContainer){
+	'''
+	- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+	return 1;
+	}
+
+	- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+	NSArray *«(listElement.itemtype as ReferencedModelType).entity.name.toFirstLower»s = [((ContentProviderMany *)[listViewWidget getContentProvider]) getDataObjects];
+	return [«(listElement.itemtype as ReferencedModelType).entity.name.toFirstLower»s count];
+	}
+
+	- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+	    return @"«(listElement.itemtype as ReferencedModelType).entity.name»s";
+	}
+	
+	- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	    static NSString *MyIdentifier = @"MyReuseIdentifier";
+	    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:MyIdentifier];
+	    if (cell == nil) {
+	        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:MyIdentifier];
+	    }
+	    «(listElement.itemtype as ReferencedModelType).entity.name.toFirstUpper»Entity *«(listElement.itemtype as ReferencedModelType).entity.name.toFirstLower» = [[((ContentProviderMany *)[listViewWidget getContentProvider]) getDataObjects] objectAtIndex:indexPath.row];
+	    NSString *displaytext =  [NSString stringWithFormat: @"«listElement.itemtext.map["%@"].join(' ')»", «listElement.itemtext.map['['+ entityRef.name.toFirstLower + ' ' + tail.attributeRef.name.toFirstLower + ']'].join(',')»];
+	    cell.textLabel.text = displaytext;
+	    
+		«IF listElement.listtype.value == 1»
+			«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name»Entity *current«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name» =  [((ContentProviderMany *)[listViewWidget getSelection]) getDataObject];
+			if ([[current«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name» «(getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.name»] containsObject: «(listElement.itemtype as ReferencedModelType).entity.name.toFirstLower»])
+			{
+		  	  cell.accessoryType = UITableViewCellAccessoryCheckmark;
+			}
+			else{
+			    cell.accessoryType = UITableViewCellAccessoryNone;
+			}
+		«ENDIF»
+	    
+	    
+	    return cell;
+	}
+	
+	-(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+		«IF listElement.listtype.value == 1» //TODO: sehr unschön so...
+			«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name»Entity *current«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name» =  [((ContentProviderMany *)[listViewWidget getSelection]) getDataObject];
+			UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+			if ([[current«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name» «(getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.name»] containsObject:[[((ContentProviderMany *)[listViewWidget getContentProvider]) getDataObjects] objectAtIndex:indexPath.row]]) {
+				cell.accessoryType = UITableViewCellAccessoryNone;
+				[current«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name» remove«(getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.name.toFirstUpper»Object:[[((ContentProviderMany *)[listViewWidget getContentProvider]) getDataObjects] objectAtIndex:indexPath.row]];
+			} else {
+				cell.accessoryType = UITableViewCellAccessoryCheckmark;
+				[current«((getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.eContainer as Entity).name» add«(getMapping(listElement, dataContainer) as PathDefinition).tail.attributeRef.name.toFirstUpper»Object:[[((ContentProviderMany *)[listViewWidget getContentProvider]) getDataObjects] objectAtIndex:indexPath.row]];
+			}
+		«ELSE»
+			[((ContentProviderMany *)[listViewWidget getContentProvider]) setCurrentDataObject:indexPath.row];
+			[[EventHandler instance] eventTriggered: [ViewEvent eventWithIdentifier:@"«listElement.name»" eventType: OnTouch]];
+		«ENDIF»
+	}
+'''
+	
+}
+
+}
+

@@ -31,4 +31,17 @@
     return event;
 }
 
+
+/*
+ *	Creates a RegisterMappingEvent with the given data mapper, content provider, data key and identifier.
+ */
++(id) eventWithDataMapper: (DataMapper *) dataMapper contentProvider: (ContentProvider *) contentProvider identifier: (NSString *) identifier
+{
+    RegisterMappingEvent *event = [[RegisterMappingEvent alloc] init];
+    event.dataMapper = dataMapper;
+    event.contentProvider = contentProvider;
+    event.identifier = identifier;
+    return event;
+}
+
 @end

@@ -136,9 +136,6 @@ public class MD2ScopeProvider extends AbstractDeclarativeScopeProvider {
 				} else {
 					container = (ContainerElement) parent.getRef();	
 				}
-				// May be null in case of linking errors - quit gracefully to avoid NullPointer below
-				if(container == null)
-					return IScope.NULLSCOPE;
 				IScope scope = delegateGetScope(context, ref);
 				return new FilteringScope(scope, new Predicate<IEObjectDescription>() {
 					@Override
