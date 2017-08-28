@@ -283,7 +283,7 @@ private «element.className» «element.attributeName»;
 			TimeType: "Md2Time"
 			DateTimeType: "Md2DateTime"		
 			
-			SensorType: "Md2Sensor"	
+			SensorType: "Md2Float"	
 			FileType: "Object" // TODO not implemented
 		}		
 	}
@@ -298,7 +298,9 @@ private «element.className» «element.attributeName»;
 			BooleanType: "Boolean"
 			DateType: "Date"
 			TimeType: "Md2Time"
-			DateTimeType: "Md2DateTime"			
+			DateTimeType: "Md2DateTime"		
+			
+			SensorType: "Float"		
 			FileType: "Object" // TODO not implemented
 		}		
 	}

@@ -50,6 +50,8 @@ class ContentProviderGen {
 				import «Settings.MD2LIBRARY_PACKAGE»model.dataStore.interfaces.Md2DataStore;
 				import «Settings.MD2LIBRARY_PACKAGE»model.type.interfaces.Md2Entity;
 				
+				import java.util.List; //TODO nur BugFix für dev_filter_design_pol
+				
 				public class «contentProvider.name.toFirstUpper» extends AbstractMd2ContentProvider {
 				    public «contentProvider.name.toFirstUpper»(«content.entity.name.toFirstUpper» content, Md2LocalStore md2DataStore) {
 				        super("«contentProvider.name»", content, md2DataStore);
@@ -62,6 +64,7 @@ class ContentProviderGen {
 		private def static generateContentProviderPOJO(String mainPackage, ContentProvider contentProvider){ '''
 			// generated in de.wwu.md2.framework.generator.android.lollipop.model.Md2ContentProvider.generateContentProvider()
 			package «mainPackage».md2.model.contentProvider;
+			
 				«var content =  contentProvider.type as ReferencedModelType»
 
 «FOR element : (content.entity as Entity).attributes»
@@ -78,6 +81,9 @@ import «Settings.MD2LIBRARY_PACKAGE»controller.eventhandler.implementation.Md2
 			import «Settings.MD2LIBRARY_PACKAGE»model.dataStore.interfaces.Md2LocalStore;
 			import «Settings.MD2LIBRARY_PACKAGE»model.dataStore.interfaces.Md2DataStore;
 			import «Settings.MD2LIBRARY_PACKAGE»model.type.interfaces.Md2Entity;
+			import de.uni_muenster.wi.md2library.model.type.implementation.Md2List;
+			
+			import java.util.List; //TODO nur BugFix für dev_filter_design_pol
 			
 			import «mainPackage».md2.model.«(content.entity as Entity).name»;
 			
@@ -88,6 +94,9 @@ import «Settings.MD2LIBRARY_PACKAGE»controller.eventhandler.implementation.Md2
 			    			
 			    public «contentProvider.name.toFirstUpper»(String key, Md2Entity content, Md2DataStore md2DataStore) {
 			       super(key, content, md2DataStore);
+			       «IF contentProvider.filter»
+			       this.filter = new Filter(«FilterGen.generateFilter(contentProvider)»);
+			       «ENDIF»
 			    }
 			@Override
 			    public String getKey() {
@@ -128,24 +137,34 @@ import «Settings.MD2LIBRARY_PACKAGE»controller.eventhandler.implementation.Md2
 			        return (Md2OnAttributeChangedHandler)this.attributeChangedEventHandlers.get(attribute);
 			    }
 			
-			
+«««						if(((Artikel)content).getSensorTest() != null){
+«««						return new
+«««						Md2Sensor(((Artikel)content).getSensorTest());	
 			
 			
 			@Override
 			    public Md2Type getValue(String attribute) {			
 			switch (attribute){
 			«FOR attribute: (content.entity as Entity).attributes»			
-			case "«attribute.name»":
-			if(((«(content.entity as Entity).name»)content).get«attribute.name.toFirstUpper»() != null){
-			return  
-			«IF attribute.type instanceof ReferencedType && !attribute.type.many»
-			((«(content.entity as Entity).name»)content).get«attribute.name.toFirstUpper»();	
-			«ELSE»
-			new «IF attribute.type.many»
-			Md2List<«EntityGen.getMd2TypeStringForAttributeType(attribute.type)»>	«ELSE»
-			«EntityGen.getMd2TypeStringForAttributeType(attribute.type)»«ENDIF»(((«(content.entity as Entity).name»)content).get«attribute.name.toFirstUpper»());	
-			«ENDIF»
-			} else { return null;}
+				case "«attribute.name»":
+				if(((«(content.entity as Entity).name»)content).get«attribute.name.toFirstUpper»() != null){
+				return  
+				«IF attribute.type instanceof ReferencedType && !attribute.type.many»
+					((«(content.entity as Entity).name»)content).get«attribute.name.toFirstUpper»();	
+				«ELSE»
+					new 
+					«IF attribute.type.many»
+						Md2List<«EntityGen.getMd2TypeStringForAttributeType(attribute.type)»>	
+					«ELSE»
+						«EntityGen.getMd2TypeStringForAttributeType(attribute.type)»
+					«ENDIF»
+					«IF (EntityGen.getMd2TypeStringForAttributeType(attribute.type) == "Md2Sensor")»
+						(((«(content.entity as Entity).name»)content).get«attribute.name.toFirstUpper»().getPlatformValue());
+					«ELSE»		
+						(((«(content.entity as Entity).name»)content).get«attribute.name.toFirstUpper»());
+					«ENDIF»
+				«ENDIF»
+				} else { return null;}
 			«ENDFOR»
 			default:return null;		
 			}
@@ -161,7 +180,6 @@ import «Settings.MD2LIBRARY_PACKAGE»controller.eventhandler.implementation.Md2
 			        if ((this.getValue(name) == null && value != null) || value != null && !this.getValue(name).toString().equals(value.toString())) {
 			        switch (name){
 			        			«FOR attribute: (content.entity as Entity).attributes»			
-
 			        			case "«attribute.name»":
 			        			   «IF !(attribute.type instanceof StringType)»
 			        			   
@@ -169,19 +187,22 @@ import «Settings.MD2LIBRARY_PACKAGE»controller.eventhandler.implementation.Md2
 			        			   		// angenommen wird entweder Md2String oder passender Md2Type als value
 			        			   		
 			        			   		«IF (attribute.type instanceof IntegerType)»
-			        			   		if(!(value instanceof «getMd2TypeStringForAttributeType(attribute.type)»)){
-			        			   			if(!(value.getString().toString().isEmpty())) {
-			        			   		 	((«(content.entity as Entity).name»)content).set«attribute.name.toFirstUpper»(Integer.parseInt(value.getString().toString()));	
-			        			   			notifyChangeHandler(name);
-			        			   			}
-			        			   		} else {
-			        			   			((«(content.entity as Entity).name»)content).set«attribute.name.toFirstUpper»(((«getMd2TypeStringForAttributeType(attribute.type)»)value).getPlatformValue());
-			        			   		}
-			        			   		break;
+				        			   		if(!(value instanceof «getMd2TypeStringForAttributeType(attribute.type)»)){
+				        			   			if(!(value.getString().toString().isEmpty())) {
+				        			   		 	((«(content.entity as Entity).name»)content).set«attribute.name.toFirstUpper»(Integer.parseInt(value.getString().toString()));	
+				        			   			notifyChangeHandler(name);
+				        			   			}
+				        			   		} else {
+				        			   				((«(content.entity as Entity).name»)content).set«attribute.name.toFirstUpper»(((«getMd2TypeStringForAttributeType(attribute.type)»)value).getPlatformValue());
+				        			   		}
+				        			   		break;
 			        			   		«ENDIF»
 			        			   «ELSE»
-			        			   ((«(content.entity as Entity).name»)content).set«attribute.name.toFirstUpper»(((«IF attribute.type.many»
-			        			   Md2List«ELSE»«getMd2TypeStringForAttributeType(attribute.type)»«ENDIF») value)«IF attribute.type instanceof ReferencedType && !attribute.type.many»
+				        			   ((«(content.entity as Entity).name»)content).set«attribute.name.toFirstUpper»(((«IF attribute.type.many»
+				        			   Md2List
+				        			   «ELSE»«getMd2TypeStringForAttributeType(attribute.type)»
+			        			   «ENDIF») value)
+			        			   «IF attribute.type instanceof ReferencedType && !attribute.type.many»
 			        			   );
 
 			        				«ELSEIF attribute.type.many»
@@ -272,6 +293,8 @@ import de.uni_muenster.wi.md2library.model.contentProvider.implementation.Abstra
 		import «Settings.MD2LIBRARY_PACKAGE»model.type.interfaces.Md2Entity;
 		import «Settings.MD2LIBRARY_PACKAGE»model.type.interfaces.Md2Type;
 		
+		import java.util.List; //TODO nur BugFix für dev_filter_design_pol
+		
 		«MD2AndroidWearableUtil.generateImportAllTypes»
 		
 		public class «contentProvider.name.toFirstUpper» extends AbstractMd2MultiContentProvider {
@@ -325,10 +348,17 @@ import de.uni_muenster.wi.md2library.model.contentProvider.implementation.Abstra
 		  				    
 		  				}	
 		  				}
+		  				
+	  					@Override
+	  					public void overwriteContent(List<Md2Entity> list) {
+	  						
+	  					}
+		  					
 		  				public void update() {
 		  					System.out.println("multi wurde geupdated");
 		  				}	
 		  		}		  	
+
 	'''
 	}	
 	
